@@ -125,3 +125,18 @@ def _load_precreated_itinerary(callback_context: CallbackContext):
         print(f"\nLoading Initial State: {data}\n")
 
     _set_initial_states(data["state"], callback_context.state)
+
+# Example of using callbacks to ask user input
+# this is incorerct for now since it is running at backend wiht stdin
+# a prompt has added in the agent to confirm this form users
+
+# def _before_process_payment(callback_context: CallbackContext):
+#     """
+#     ask user input before going to process payment
+#     Args:
+#         callback_context: The callback context.
+#     """
+#     callback_context.state["user_payment_confirmation"] = input(
+#         "Please enter YES to confirm the payment, or NO to cancel: "
+#     )
+

@@ -116,18 +116,6 @@
               "end_time": "13:00",
               "booking_required": true,
               "booking_id": "GHI-789-PQR"
-            },
-            {
-              "event_type":"flight",
-              "description": "Return Flight from Seattle to San Diego",
-              "flight_number": "UA5678",
-              "departure_airport": "SEA",
-              "arrival_airport": "SAN",
-              "departure_time": "16:00",
-              "boarding_time": "15:30",
-              "seat_number": "10F",
-              "booking_required": true,
-              "booking_id": "LMN-012-STU"
             }
           ]
         }
@@ -137,10 +125,6 @@
     "destination": "Seattle",    
     "start_date": "2025-06-15",
     "end_date": "2025-06-17",    
-    "outbound_flight_selection" : "",
-    "outbound_seat_number" : "",
-    "return_flight_selection" : "",
-    "return_seat_number" : "",
     "hotel_selection" : "",
     "room_selection" : "",
     "poi" : "",

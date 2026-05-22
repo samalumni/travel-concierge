@@ -23,14 +23,6 @@ from travel_concierge.shared_libraries import constants
 from travel_concierge.sub_agents.in_trip import prompt
 
 
-def flight_status_check(
-    flight_number: str, flight_date: str, checkin_time: str, departure_time: str
-):
-    """Checks the status of a flight, given its flight_number, date, checkin_time and departure_time."""
-    print("Checking", flight_number, flight_date, checkin_time, departure_time)
-    return {"status": f"Flight {flight_number} checked"}
-
-
 def event_booking_check(event_name: str, event_date: str, event_location: str):
     """Checks the status of an event that requires booking, given its event_name, date, and event_location."""
     print("Checking", event_name, event_date, event_location)
@@ -64,8 +56,6 @@ def get_event_time_as_destination(
 ):
     """Returns an event time appropriate for the location type."""
     match destin_json["event_type"]:
-        case "flight":
-            return destin_json["boarding_time"]
         case "hotel":
             return destin_json["check_in_time"]
         case "visit":
@@ -77,11 +67,6 @@ def get_event_time_as_destination(
 def parse_as_origin(origin_json: dict[str, Any]):
     """Returns a tuple of strings (origin, depart_by) appropriate for the starting location."""
     match origin_json["event_type"]:
-        case "flight":
-            return (
-                origin_json["arrival_airport"] + " Airport",
-                origin_json["arrival_time"],
-            )
         case "hotel":
             return (
                 origin_json["description"]
@@ -110,11 +95,6 @@ def parse_as_origin(origin_json: dict[str, Any]):
 def parse_as_destin(destin_json: dict[str, Any]):
     """Returns a tuple of strings (destination, arrive_by) appropriate for the destination."""
     match destin_json["event_type"]:
-        case "flight":
-            return (
-                destin_json["departure_airport"] + " Airport",
-                "An hour before " + destin_json["boarding_time"],
-            )
         case "hotel":
             return (
                 destin_json["description"]

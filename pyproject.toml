@@ -25,6 +25,7 @@ dependencies = [
     "arize-phoenix-evals>=0.20.8",
     "scikit-learn>=1.7.0",
     "pandas>=2.3.0",
+    "sqlalchemy>=2.0.0",
 ]
 
 [dependency-groups]

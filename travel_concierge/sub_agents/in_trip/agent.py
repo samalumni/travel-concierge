@@ -21,7 +21,6 @@ from travel_concierge import MODEL
 from travel_concierge.sub_agents.in_trip import prompt
 from travel_concierge.sub_agents.in_trip.tools import (
     event_booking_check,
-    flight_status_check,
     transit_coordination,
     weather_impact_check,
 )
@@ -41,7 +40,7 @@ trip_monitor_agent = Agent(
     name="trip_monitor_agent",
     description="Monitor aspects of a itinerary and bring attention to items that necessitate changes",
     instruction=prompt.TRIP_MONITOR_INSTR,
-    tools=[flight_status_check, event_booking_check, weather_impact_check],
+    tools=[event_booking_check, weather_impact_check],
     output_key="daily_checks",  # can be sent via email.
 )
 

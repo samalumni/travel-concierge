@@ -14,12 +14,25 @@
 
 """Booking agent and sub-agents, handling the confirmation and payment of bookable events."""
 
+from google.adk.agents.callback_context import CallbackContext
+from google.adk.sessions.state import State
+from google.adk.tools import ToolContext
+#from travel_concierge.tools.memory import _before_process_payment
+
 from google.adk.agents import Agent
 from google.adk.tools.agent_tool import AgentTool
 from google.genai.types import GenerateContentConfig
 
 from travel_concierge import MODEL
 from travel_concierge.sub_agents.booking import prompt
+from travel_concierge.sub_agents.booking.tools import (
+    get_booking_status,
+    get_guest_bookings,
+    list_available_rooms,
+    save_hotel_booking,
+    search_bookings,
+    update_booking,
+)
 
 create_reservation = Agent(
     model=MODEL,
@@ -36,13 +49,14 @@ payment_choice = Agent(
     instruction=prompt.PAYMENT_CHOICE_INSTR,
 )
 
+   
 process_payment = Agent(
     model=MODEL,
     name="process_payment",
     description="""Given a selected payment choice, processes the payment, completing the transaction.""",
     instruction=prompt.PROCESS_PAYMENT_INSTR,
+   # before_agent_callback=_before_process_payment,
 )
-
 
 booking_agent = Agent(
     model=MODEL,
@@ -53,6 +67,12 @@ booking_agent = Agent(
         AgentTool(agent=create_reservation),
         AgentTool(agent=payment_choice),
         AgentTool(agent=process_payment),
+        save_hotel_booking,
+        update_booking,
+        get_booking_status,
+        get_guest_bookings,
+        list_available_rooms,
+        search_bookings,
     ],
     generate_content_config=GenerateContentConfig(temperature=0.0, top_p=0.5),
 )

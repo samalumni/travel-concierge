@@ -29,6 +29,6 @@ class Feedback(BaseModel):
     score: int | float
     text: str | None = ""
     log_type: Literal["feedback"] = "feedback"
-    service_name: Literal["my-travel-concierge"] = "my-travel-concierge"
+    service_name: Literal["deploy-travel-concierge"] = "deploy-travel-concierge"
     user_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     session_id: str = Field(default_factory=lambda: str(uuid.uuid4()))

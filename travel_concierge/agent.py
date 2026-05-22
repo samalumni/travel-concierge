@@ -27,6 +27,7 @@ from travel_concierge.sub_agents.planning.agent import planning_agent
 from travel_concierge.sub_agents.post_trip.agent import post_trip_agent
 from travel_concierge.sub_agents.pre_trip.agent import pre_trip_agent
 from travel_concierge.tools.memory import _load_precreated_itinerary
+from travel_concierge.tools.profile import load_guest_profile
 from travel_concierge.tracing import instrument_adk_with_arize
 
 from . import MODEL
@@ -34,12 +35,13 @@ from . import MODEL
 _ = instrument_adk_with_arize()
 
 
-with using_session(session_id=uuid.uuid4()):
+with using_session(session_id=str(uuid.uuid4())):
     root_agent = Agent(
         model=MODEL,
         name="root_agent",
         description="A Travel Conceirge using the services of multiple sub-agents",
         instruction=prompt.ROOT_AGENT_INSTR,
+        tools=[load_guest_profile],
         sub_agents=[
             inspiration_agent,
             planning_agent,

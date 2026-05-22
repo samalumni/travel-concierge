@@ -38,6 +38,7 @@ def setup_telemetry() -> str | None:
         os.environ.setdefault(
             "OTEL_RESOURCE_ATTRIBUTES",
             f"service.namespace=my-travel-concierge,service.version={commit_sha}",
+            f"service.namespace=deploy-travel-concierge,service.version={commit_sha}",
         )
         path = os.environ.get("GENAI_TELEMETRY_PATH", "completions")
         os.environ.setdefault(

@@ -58,56 +58,6 @@ class HotelsSelection(BaseModel):
     hotels: list[Hotel]
 
 
-class Seat(BaseModel):
-    """A Seat from the search."""
-
-    is_available: bool = Field(
-        description="Whether the seat is available for selection."
-    )
-    price_in_usd: int = Field(description="The cost of the seat selection.")
-    seat_number: str = Field(description="Seat number, e.g. 22A, 34F... etc.")
-
-
-class SeatsSelection(BaseModel):
-    """A list of seats from the search."""
-
-    seats: list[list[Seat]]
-
-
-class AirportEvent(BaseModel):
-    """An Airport event."""
-
-    city_name: str = Field(description="Name of the departure city")
-    airport_code: str = Field(description="IATA code of the departure airport")
-    timestamp: str = Field(
-        description="ISO 8601 departure or arrival date and time"
-    )
-
-
-class Flight(BaseModel):
-    """A Flight search result."""
-
-    flight_number: str = Field(
-        description="Unique identifier for the flight, like BA123, AA31, etc."
-    )
-    departure: AirportEvent
-    arrival: AirportEvent
-    airlines: list[str] = Field(
-        description="Airline names, e.g., American Airlines, Emirates"
-    )
-    airline_logo: str = Field(description="Airline logo location")
-    price_in_usd: int = Field(description="Flight price in US dollars")
-    number_of_stops: int = Field(
-        description="Number of stops during the flight"
-    )
-
-
-class FlightsSelection(BaseModel):
-    """A list of flights from the search."""
-
-    flights: list[Flight]
-
-
 class Destination(BaseModel):
     """A destination recommendation."""
 
@@ -174,25 +124,6 @@ class AttractionEvent(BaseModel):
     price: str | None = Field(description="Some events may cost money")
 
 
-class FlightEvent(BaseModel):
-    """A Flight Segment in the itinerary."""
-
-    event_type: str = Field(default="flight")
-    description: str = Field(description="A title or description of the Flight")
-    booking_required: bool = Field(default=True)
-    departure_airport: str = Field(description="Airport code, i.e. SEA")
-    arrival_airport: str = Field(description="Airport code, i.e. SAN")
-    flight_number: str = Field(description="Flight number, e.g. UA5678")
-    boarding_time: str = Field(description="Time in HH:MM format, e.g. 15:30")
-    seat_number: str = Field(description="Seat Row and Position, e.g. 32A")
-    departure_time: str = Field(description="Time in HH:MM format, e.g. 16:00")
-    arrival_time: str = Field(description="Time in HH:MM format, e.g. 20:00")
-    price: str | None = Field(description="Total air fare")
-    booking_id: str | None = Field(
-        description="Booking Reference ID, e.g LMN-012-STU"
-    )
-
-
 class HotelEvent(BaseModel):
     """A Hotel Booking in the itinerary."""
 
@@ -220,7 +151,7 @@ class ItineraryDay(BaseModel):
         description="Identify which day of the trip this represents, e.g. 1, 2, 3... etc."
     )
     date: str = Field(description="The Date this day YYYY-MM-DD format")
-    events: list[FlightEvent | HotelEvent | AttractionEvent] = Field(
+    events: list[HotelEvent | AttractionEvent] = Field(
         default=[], description="The list of events for the day"
     )
 
@@ -234,7 +165,7 @@ class Itinerary(BaseModel):
     start_date: str = Field(description="Trip Start Date in YYYY-MM-DD format")
     end_date: str = Field(description="Trip End Date in YYYY-MM-DD format")
     origin: str = Field(description="Trip Origin, e.g. San Diego")
-    destination: str = (Field(description="Trip Destination, e.g. Seattle"),)
+    destination: str = Field(description="Trip Destination, e.g. Seattle")
     days: list[ItineraryDay] = Field(
         default_factory=list, description="The multi-days itinerary"
     )

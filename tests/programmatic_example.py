@@ -121,8 +121,6 @@ for user_input in user_inputs:
                             )
                         case "map_tool":
                             print("\n[app]: To render a map of pois")
-                        case "flight_selection_agent":
-                            print("\n[app]: Render a list")
                         case "hotel_selection_agent":
                             print("\n[app]: Render a list")
                     # ... etc

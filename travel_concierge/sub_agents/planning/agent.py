@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# ybai: updated to remove the flight agent and focus on the hotel and itinerary planning, as well as memory tool usage. The flight booking part can be added back later as a separate agent if needed.
+
 """Planning agent. A pre-booking agent covering the planning part of the trip."""
 
 from google.adk.agents import Agent
@@ -61,39 +63,12 @@ hotel_search_agent = Agent(
 )
 
 
-flight_seat_selection_agent = Agent(
-    model=MODEL,
-    name="flight_seat_selection_agent",
-    description="Help users with the seat choices",
-    instruction=prompt.FLIGHT_SEAT_SELECTION_INSTR,
-    disallow_transfer_to_parent=True,
-    disallow_transfer_to_peers=True,
-    output_schema=types.SeatsSelection,
-    output_key="seat",
-    generate_content_config=types.json_response_config,
-)
-
-flight_search_agent = Agent(
-    model=MODEL,
-    name="flight_search_agent",
-    description="Help users find best flight deals",
-    instruction=prompt.FLIGHT_SEARCH_INSTR,
-    disallow_transfer_to_parent=True,
-    disallow_transfer_to_peers=True,
-    output_schema=types.FlightsSelection,
-    output_key="flight",
-    generate_content_config=types.json_response_config,
-)
-
-
 planning_agent = Agent(
     model=MODEL,
-    description="""Helps users with travel planning, complete a full itinerary for their vacation, finding best deals for flights and hotels.""",
+    description="""Helps users with travel planning, complete a full itinerary for their vacation, finding best deals for hotels.""",
     name="planning_agent",
     instruction=prompt.PLANNING_AGENT_INSTR,
     tools=[
-        AgentTool(agent=flight_search_agent),
-        AgentTool(agent=flight_seat_selection_agent),
         AgentTool(agent=hotel_search_agent),
         AgentTool(agent=hotel_room_selection_agent),
         AgentTool(agent=itinerary_agent),
