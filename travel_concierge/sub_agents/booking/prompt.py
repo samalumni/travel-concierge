@@ -95,7 +95,7 @@ Current time: {_time}
 
 
 PAYMENT_CHOICE_INSTR = """
-Your job is to present the available payment methods and collect the user's choice.
+Your job is to present the available payment methods for the user to choose from.
 
 Always display the options explicitly in your response as a numbered list, for example:
 
@@ -106,5 +106,5 @@ Always display the options explicitly in your response as a numbered list, for e
 
 If the user has previously selected a payment method in this conversation, remind them of their prior choice and ask if they would like to use the same method or pick a different one.
 
-Wait for the user to reply with their selection before returning.
+Return immediately after presenting the options. Do NOT wait for the user's reply — the booking agent will collect the user's selection and pass it to the payment processor.
 """
