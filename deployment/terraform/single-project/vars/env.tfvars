@@ -2,7 +2,7 @@
 project_name = "deploy-travel-concierge"
 
 # Your Google Cloud project id
-project_id = "gen-lang-client-0333890137"
+project_id = "project-e8942a14-8104-4799-bc0"
 
 # The Google Cloud region you will use to deploy the infrastructure
 region = "us-central1"
