@@ -22,6 +22,7 @@ from google.genai.types import GenerateContentConfig
 
 from travel_concierge import MODEL
 from travel_concierge.shared_libraries import types
+from travel_concierge.hotel_policy.callbacks import planning_policy_callback
 from travel_concierge.sub_agents.planning import prompt
 from travel_concierge.tools.memory import memorize
 
@@ -35,6 +36,7 @@ itinerary_agent = Agent(
     output_schema=types.Itinerary,
     output_key="itinerary",
     generate_content_config=types.json_response_config,
+    before_model_callback=planning_policy_callback,
 )
 
 
@@ -48,6 +50,7 @@ hotel_room_selection_agent = Agent(
     output_schema=types.RoomsSelection,
     output_key="room",
     generate_content_config=types.json_response_config,
+    before_model_callback=planning_policy_callback,
 )
 
 hotel_search_agent = Agent(
@@ -60,6 +63,7 @@ hotel_search_agent = Agent(
     output_schema=types.HotelsSelection,
     output_key="hotel",
     generate_content_config=types.json_response_config,
+    before_model_callback=planning_policy_callback,
 )
 
 
@@ -75,4 +79,5 @@ planning_agent = Agent(
         memorize,
     ],
     generate_content_config=GenerateContentConfig(temperature=0.1, top_p=0.5),
+    before_model_callback=planning_policy_callback,
 )

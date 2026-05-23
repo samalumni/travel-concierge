@@ -12,7 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""ADK plugin that injects the IHG general hotel policy into every agent's system instruction."""
+"""ADK plugin that injects the IHG general hotel policy into every agent's
+system instruction.
+
+Design responsibility: cross-cutting, application-wide policy only.
+Agent-specific policies are injected via per-agent before_model_callbacks
+defined in hotel_policy/callbacks.py and wired directly to each Agent.
+
+Execution order (from ADK internals):
+  1. This plugin's before_model_callback runs first (all agents).
+  2. Each agent's own before_model_callback runs next (specific agent only).
+Both modify LlmRequest in sequence; this plugin always returns None so it
+never short-circuits the agent-level callbacks.
+"""
 
 from pathlib import Path
 from typing import Optional
@@ -22,15 +34,20 @@ from google.adk.models.llm_request import LlmRequest
 from google.adk.models.llm_response import LlmResponse
 from google.adk.plugins import BasePlugin
 
-_POLICY_FILE = Path(__file__).parent / "general_hotel_policy.md"
+_GENERAL_POLICY_FILE = Path(__file__).parent / "general_hotel_policy.md"
 
 
 class HotelPolicyPlugin(BasePlugin):
-    """Injects the IHG general hotel policy into every model call across all agents."""
+    """Appends the IHG general hotel policy to every model call across all agents.
+
+    Single responsibility: inject general_hotel_policy.md globally.
+    Agent-specific policies are the responsibility of per-agent callbacks
+    in hotel_policy/callbacks.py.
+    """
 
     def __init__(self) -> None:
         super().__init__(name="hotel_policy")
-        self._policy_text: str = _POLICY_FILE.read_text(encoding="utf-8")
+        self._general_policy: str = _GENERAL_POLICY_FILE.read_text(encoding="utf-8")
 
     async def before_model_callback(
         self,
@@ -38,6 +55,11 @@ class HotelPolicyPlugin(BasePlugin):
         callback_context: CallbackContext,
         llm_request: LlmRequest,
     ) -> Optional[LlmResponse]:
-        """Append the hotel policy to the system instruction before each model call."""
-        llm_request.append_instructions([self._policy_text])
+        """Append the general hotel policy to the system instruction.
+
+        Always returns None so the agent-level before_model_callback
+        is never short-circuited.
+        """
+        llm_request.append_instructions([self._general_policy])
         return None
+

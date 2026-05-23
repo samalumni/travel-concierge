@@ -26,6 +26,7 @@ from travel_concierge.sub_agents.inspiration.agent import inspiration_agent
 from travel_concierge.sub_agents.planning.agent import planning_agent
 from travel_concierge.sub_agents.post_trip.agent import post_trip_agent
 from travel_concierge.sub_agents.pre_trip.agent import pre_trip_agent
+from travel_concierge.hotel_policy.callbacks import root_agent_policy_callback
 from travel_concierge.hotel_policy.plugin import HotelPolicyPlugin
 from travel_concierge.tools.memory import _load_precreated_itinerary
 from travel_concierge.tools.profile import load_guest_profile
@@ -52,6 +53,7 @@ with using_session(session_id=str(uuid.uuid4())):
             post_trip_agent,
         ],
         before_agent_callback=_load_precreated_itinerary,
+        before_model_callback=root_agent_policy_callback,
     )
 
 from google.adk.apps import App

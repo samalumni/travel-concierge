@@ -24,6 +24,7 @@ from google.adk.tools.agent_tool import AgentTool
 from google.genai.types import GenerateContentConfig
 
 from travel_concierge import MODEL
+from travel_concierge.hotel_policy.callbacks import booking_policy_callback
 from travel_concierge.sub_agents.booking import prompt
 from travel_concierge.sub_agents.booking.tools import (
     get_booking_status,
@@ -39,6 +40,7 @@ create_reservation = Agent(
     name="create_reservation",
     description="""Create a reservation for the selected item.""",
     instruction=prompt.CONFIRM_RESERVATION_INSTR,
+    before_model_callback=booking_policy_callback,
 )
 
 
@@ -47,6 +49,7 @@ payment_choice = Agent(
     name="payment_choice",
     description="""Show the users available payment choices.""",
     instruction=prompt.PAYMENT_CHOICE_INSTR,
+    before_model_callback=booking_policy_callback,
 )
 
    
@@ -55,6 +58,7 @@ process_payment = Agent(
     name="process_payment",
     description="""Given a selected payment choice, processes the payment, completing the transaction.""",
     instruction=prompt.PROCESS_PAYMENT_INSTR,
+    before_model_callback=booking_policy_callback,
    # before_agent_callback=_before_process_payment,
 )
 
@@ -75,4 +79,5 @@ booking_agent = Agent(
         search_bookings,
     ],
     generate_content_config=GenerateContentConfig(temperature=0.0, top_p=0.5),
+    before_model_callback=booking_policy_callback,
 )

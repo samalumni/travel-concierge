@@ -18,6 +18,7 @@ from google.adk.agents import Agent
 from google.adk.tools.agent_tool import AgentTool
 
 from travel_concierge import MODEL
+from travel_concierge.hotel_policy.callbacks import in_trip_policy_callback
 from travel_concierge.sub_agents.in_trip import prompt
 from travel_concierge.sub_agents.in_trip.tools import (
     event_booking_check,
@@ -32,6 +33,7 @@ day_of_agent = Agent(
     name="day_of_agent",
     description="Day_of agent is the agent handling the travel logistics of a trip.",
     instruction=transit_coordination,
+    before_model_callback=in_trip_policy_callback,
 )
 
 
@@ -42,6 +44,7 @@ trip_monitor_agent = Agent(
     instruction=prompt.TRIP_MONITOR_INSTR,
     tools=[event_booking_check, weather_impact_check],
     output_key="daily_checks",  # can be sent via email.
+    before_model_callback=in_trip_policy_callback,
 )
 
 
@@ -54,4 +57,5 @@ in_trip_agent = Agent(
         trip_monitor_agent
     ],  # This can be run as an AgentTool. Illustrate as an Agent for demo purpose.
     tools=[AgentTool(agent=day_of_agent), memorize],
+    before_model_callback=in_trip_policy_callback,
 )

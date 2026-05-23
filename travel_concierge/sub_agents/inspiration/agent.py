@@ -25,6 +25,7 @@ from travel_concierge.shared_libraries.types import (
     POISuggestions,
     json_response_config,
 )
+from travel_concierge.hotel_policy.callbacks import inspiration_policy_callback
 from travel_concierge.sub_agents.inspiration import prompt
 from travel_concierge.tools.places import get_places_toolset
 
@@ -38,6 +39,7 @@ place_agent = Agent(
     output_schema=DestinationIdeas,
     output_key="place",
     generate_content_config=json_response_config,
+    before_model_callback=inspiration_policy_callback,
 )
 
 maps_grounding_toolset = []
@@ -57,6 +59,7 @@ poi_agent = Agent(
     output_key="poi",
     generate_content_config=json_response_config,
     tools=maps_grounding_toolset,
+    before_model_callback=inspiration_policy_callback,
 )
 
 inspiration_agent = Agent(
@@ -65,4 +68,5 @@ inspiration_agent = Agent(
     description="A travel inspiration agent who inspire users, and discover their next vacations; Provide information about places, activities, interests,",
     instruction=prompt.INSPIRATION_AGENT_INSTR,
     tools=[AgentTool(agent=place_agent), AgentTool(agent=poi_agent)],
+    before_model_callback=inspiration_policy_callback,
 )
