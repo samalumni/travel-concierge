@@ -1,0 +1,15 @@
+name: "my-travel-concierge"
+acli_version: "0.2.0"
+agent_directory: "travel_concierge"
+region: "us-central1"
+base_template: "remote_-3852035611233144290"
+generated_at: "2026-05-24T18:58:13.700368+00:00"
+language: "python"
+create_params:
+  deployment_target: "agent_runtime"
+  session_type: "none"
+  cicd_runner: "skip"
+  include_data_ingestion: false
+  
+  datastore: "none"
+  agent_guidance_filename: "GEMINI.md"
