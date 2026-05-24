@@ -3,6 +3,14 @@
 Saved from chat session `efd962aa-a7b3-4240-aefd-e9d0bc852040`  
 Date: 2026-05-23
 
+## Context
+
+I instructed the copilot to design and implement the agent level policy. Each agent will have its own separated policy in addition to the general global policy which is enforced in the app runner plugin. The policy is also short so just add the content to the agent context when agent is called.
+
+The copilot did some analysis and implemented it within the app level plugin, with a policy map, and checks agent name in the `callbackContext` to apply the designated one.
+
+This does not seem to be the right way per my understanding of the current ADK's agent design patterns. I then realized that the copilot (which uses Claude Sonnet 4.6) might not have all the knowledge of the current ADK. I started to explore this with it.
+
 ---
 
 ## User
