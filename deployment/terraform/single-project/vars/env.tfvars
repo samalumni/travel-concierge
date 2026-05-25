@@ -5,4 +5,4 @@ project_name = "deploy-travel-concierge"
 project_id = "project-e8942a14-8104-4799-bc0"
 
 # The Google Cloud region you will use to deploy the infrastructure
-region = "us-central1"
+region = "us-west1"

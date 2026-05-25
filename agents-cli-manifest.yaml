@@ -1,7 +1,7 @@
 name: "deploy-travel-concierge"
 acli_version: "0.2.0"
 agent_directory: "travel_concierge"
-region: "us-central1"
+region: "us-west1"
 base_template: "remote_-213329642889397254"
 generated_at: "2026-05-21T03:11:58.308753+00:00"
 language: "python"

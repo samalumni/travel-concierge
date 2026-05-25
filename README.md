@@ -110,7 +110,7 @@ GOOGLE_GENAI_USE_VERTEXAI=1
 
 # Vertex backend config
 GOOGLE_CLOUD_PROJECT=__YOUR_CLOUD_PROJECT_ID__
-GOOGLE_CLOUD_LOCATION=us-central1
+GOOGLE_CLOUD_LOCATION=us-west1
 
 # Maps API
 GOOGLE_MAPS_API_KEY=__YOUR_API_KEY_HERE__
@@ -292,7 +292,7 @@ uv run python deployment/deploy.py --create
 When this command returns, if it succeeds it will print an Agent Runtime resource
 id that looks something like this:
 ```
-projects/************/locations/us-central1/reasoningEngines/7737333693403889664
+projects/************/locations/us-west1/reasoningEngines/7737333693403889664
 ```
 
 To quickly test that the agent has successfully deployed,
