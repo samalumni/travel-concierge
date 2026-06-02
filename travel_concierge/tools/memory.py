@@ -26,8 +26,8 @@ from google.adk.tools import ToolContext
 from travel_concierge.shared_libraries import constants
 
 SAMPLE_SCENARIO_PATH = os.getenv(
-    "TRAVEL_CONCIERGE_SCENARIO",
-    "travel_concierge/profiles/itinerary_empty_default.json",
+    "HOTEL_CONCIERGE_SCENARIO",
+    "travel_concierge/profiles/stay_empty_default.json",
 )
 
 
@@ -88,36 +88,24 @@ def forget(key: str, value: str, tool_context: ToolContext):
 
 
 def _set_initial_states(source: dict[str, Any], target: State | dict[str, Any]):
-    """
-    Setting the initial session state given a JSON object of states.
-
-    Args:
-        source: A JSON object of states.
-        target: The session state object to insert into.
-    """
+    """Set initial session state from a JSON scenario file."""
     if constants.SYSTEM_TIME not in target:
         target[constants.SYSTEM_TIME] = str(datetime.now())
 
-    if constants.ITIN_INITIALIZED not in target:
-        target[constants.ITIN_INITIALIZED] = True
-
+    if constants.STAY_INITIALIZED not in target:
+        target[constants.STAY_INITIALIZED] = True
         target.update(source)
 
-        itinerary = source.get(constants.ITIN_KEY, {})
-        if itinerary:
-            target[constants.ITIN_START_DATE] = itinerary[constants.START_DATE]
-            target[constants.ITIN_END_DATE] = itinerary[constants.END_DATE]
-            target[constants.ITIN_DATETIME] = itinerary[constants.START_DATE]
+        stay = source.get(constants.STAY_KEY, {})
+        if stay:
+            target[constants.STAY_CHECK_IN] = stay.get("check_in_date", "")
+            target[constants.STAY_CHECK_OUT] = stay.get("check_out_date", "")
 
 
-def _load_precreated_itinerary(callback_context: CallbackContext):
-    """
-    Sets up the initial state.
-    Set this as a callback as before_agent_call of the root_agent.
-    This gets called before the system instruction is contructed.
+def _load_precreated_stay(callback_context: CallbackContext):
+    """Load the initial session state from the scenario JSON file.
 
-    Args:
-        callback_context: The callback context.
+    Set this as before_agent_callback on root_agent.
     """
     data = {}
     with open(SAMPLE_SCENARIO_PATH) as file:
