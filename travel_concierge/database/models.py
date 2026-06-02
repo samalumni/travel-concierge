@@ -92,6 +92,7 @@ class Guest(Base):
     phone: Mapped[str | None] = mapped_column(String(30), nullable=True)
     created_at: Mapped[datetime] = mapped_column(default=_utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=_utcnow, onupdate=_utcnow)
+    preferences: Mapped[str | None] = mapped_column(String(4096), nullable=True)
 
     bookings: Mapped[list["Booking"]] = relationship(
         "Booking", back_populates="guest", cascade="all, delete-orphan"
@@ -199,6 +200,9 @@ class Booking(Base):
     guest: Mapped["Guest"] = relationship("Guest", back_populates="bookings")
     hotel: Mapped["Hotel"] = relationship("Hotel", back_populates="bookings")
     room: Mapped["Room"] = relationship("Room", back_populates="bookings")
+    charges: Mapped[list["ServiceCharge"]] = relationship(
+        "ServiceCharge", back_populates="booking", cascade="all, delete-orphan"
+    )
 
     __table_args__ = (
         CheckConstraint("check_out_date > check_in_date", name="ck_booking_dates"),
@@ -211,3 +215,31 @@ class Booking(Base):
             f"<Booking {self.booking_id!r} guest={self.guest_id!r} "
             f"hotel={self.hotel_id!r} status={self.status}>"
         )
+
+
+# ---------------------------------------------------------------------------
+# ServiceCharge
+# ---------------------------------------------------------------------------
+
+class ServiceCharge(Base):
+    """A charge posted to the guest's room bill during their stay."""
+
+    __tablename__ = "service_charge"
+
+    charge_id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_new_uuid)
+    booking_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("booking.booking_id", ondelete="CASCADE"), index=True
+    )
+    service_type: Mapped[str] = mapped_column(String(50))
+    description: Mapped[str] = mapped_column(String(500))
+    amount_usd: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+    posted_at: Mapped[datetime] = mapped_column(default=_utcnow)
+
+    booking: Mapped["Booking"] = relationship("Booking", back_populates="charges")
+
+    __table_args__ = (
+        CheckConstraint("amount_usd >= 0", name="ck_charge_non_negative"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<ServiceCharge {self.charge_id!r} {self.service_type!r} ${self.amount_usd}>"
