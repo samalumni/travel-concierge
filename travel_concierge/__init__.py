@@ -25,5 +25,4 @@ MODEL = os.getenv("GOOGLE_GENAI_MODEL")
 if not MODEL:
     MODEL = "gemini-2.5-flash"
 
-# Lazy import of agent to avoid circular dependency during migration
-# from . import agent  # noqa: E402
+from . import agent  # noqa: E402
