@@ -29,6 +29,7 @@ def post_room_charge(
     Returns:
         A dict with charge_id, service_type, description, amount_usd, posted_at.
     """
+    amount_usd = round(amount_usd, 2)  # normalise before store and return
     charge_id = str(uuid.uuid4())
     posted_at = datetime.now(timezone.utc)
 

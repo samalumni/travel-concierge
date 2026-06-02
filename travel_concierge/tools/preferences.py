@@ -36,6 +36,8 @@ def extract_preferences(feedback_text: str) -> list[dict]:
                 "Map them to structured fields such as pillow_preference, "
                 "room_temperature_c, floor_preference, bed_type_preference, "
                 "view_preference, or dietary_restrictions. "
+                "For dietary_restrictions, return the value as a list of strings (e.g. [\"vegan\", \"nut-free\"]). "
+                "For all other fields, return the value as a single string. "
                 f"Feedback: {feedback_text}"
             ),
             config=genai_types.GenerateContentConfig(

@@ -44,9 +44,9 @@ class ServiceCharge(BaseModel):
 
 class ExtractedPreference(BaseModel):
     """A single structured preference extracted from free-text feedback."""
-    field: str          # e.g. "pillow_preference"
-    value: str          # e.g. "feather"
-    confidence: str     # "high" | "medium" | "low"
+    field: str                  # e.g. "pillow_preference"
+    value: str | list[str]      # list for multi-value fields like dietary_restrictions
+    confidence: str             # "high" | "medium" | "low"
 
 
 class Room(BaseModel):
