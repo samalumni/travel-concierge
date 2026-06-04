@@ -40,7 +40,7 @@ import os
 from contextlib import contextmanager
 from typing import Generator
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -71,7 +71,14 @@ def _build_engine() -> Engine:
     # Redact credentials from the log line
     safe_url = url.split("@")[-1] if "@" in url else url
     logger.info("Building DB engine: %s", safe_url)
-    return create_engine(url, echo=False, connect_args=connect_args)
+    engine = create_engine(url, echo=False, connect_args=connect_args)
+    if url.startswith("sqlite"):
+        @event.listens_for(engine, "connect")
+        def set_sqlite_fk_pragma(dbapi_connection, connection_record):
+            cursor = dbapi_connection.cursor()
+            cursor.execute("PRAGMA foreign_keys=ON")
+            cursor.close()
+    return engine
 
 
 engine: Engine = _build_engine()

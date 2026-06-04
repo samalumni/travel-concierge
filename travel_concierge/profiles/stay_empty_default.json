@@ -1,0 +1,17 @@
+{
+  "state": {
+    "user_profile": {
+      "dietary_restrictions": [],
+      "special_requests": [],
+      "pillow_preference": null,
+      "room_temperature_c": null,
+      "floor_preference": null,
+      "bed_type_preference": null,
+      "view_preference": null
+    },
+    "stay_record": {},
+    "stay_check_in_date": "",
+    "stay_check_out_date": "",
+    "guest_bookings": []
+  }
+}

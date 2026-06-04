@@ -14,7 +14,6 @@
 
 """Basic tests for individual tools."""
 
-import importlib
 import unittest
 
 import pytest
@@ -38,37 +37,29 @@ session_service = InMemorySessionService()
 artifact_service = InMemoryArtifactService()
 
 
-class TestAgents(unittest.TestCase):
-    """Test cases for the Travel Concierge cohort of agents."""
-
+class TestMemoryTool(unittest.TestCase):
     def setUp(self):
-        """Set up for test methods."""
         super().setUp()
         self.session = session_service.create_session_sync(
-            app_name="Travel_Concierge",
-            user_id="traveler0115",
+            app_name="hotel_concierge",
+            user_id="guest0001",
         )
-        self.user_id = "traveler0115"
-        self.session_id = self.session.id
-
         self.invoc_context = InvocationContext(
             session_service=session_service,
-            invocation_id="ABCD",
+            invocation_id="TEST-01",
             agent=root_agent,
             session=self.session,
         )
         self.tool_context = ToolContext(invocation_context=self.invoc_context)
 
-    def test_memory(self):
+    def test_memorize_stores_value(self):
         result = memorize(
-            key="itinerary_datetime",
-            value="12/31/2025 11:59:59",
+            key="arrival_eta",
+            value="15:30",
             tool_context=self.tool_context,
         )
         self.assertIn("status", result)
-        self.assertEqual(
-            self.tool_context.state["itinerary_datetime"], "12/31/2025 11:59:59"
-        )
+        self.assertEqual(self.tool_context.state["arrival_eta"], "15:30")
 
 
 def test_maps_toolset_requires_api_key(monkeypatch):
@@ -81,28 +72,5 @@ def test_maps_toolset_with_api_key(monkeypatch):
     monkeypatch.setenv("GOOGLE_MAPS_API_KEY", "test-key")
     toolset = get_places_toolset()
     assert toolset is not None
-    from google.adk.tools.mcp_tool import McpToolset # noqa: PLC0415, I001
-
+    from google.adk.tools.mcp_tool import McpToolset
     assert isinstance(toolset, McpToolset)
-
-
-def test_poi_agent_omits_maps_tool_without_api_key(monkeypatch):
-    monkeypatch.delenv("GOOGLE_MAPS_API_KEY", raising=False)
-    import travel_concierge.sub_agents.inspiration.agent as insp_agent # noqa: PLC0415, I001
-    importlib.reload(insp_agent)
-
-    assert not any(
-        tool.__class__.__name__ == "McpToolset"
-        for tool in insp_agent.poi_agent.tools
-    )
-
-
-def test_poi_agent_includes_maps_tool_with_api_key(monkeypatch):
-    monkeypatch.setenv("GOOGLE_MAPS_API_KEY", "test-key")
-    import travel_concierge.sub_agents.inspiration.agent as insp_agent # noqa: PLC0415, I001
-    importlib.reload(insp_agent)
-
-    assert any(
-        tool.__class__.__name__ == "McpToolset"
-        for tool in insp_agent.poi_agent.tools
-    )

@@ -1,4 +1,4 @@
-# Copyright 2025 Google LLC
+# Copyright 2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,14 +15,10 @@
 """Constants used as keys into ADK's session state."""
 
 SYSTEM_TIME = "_time"
-ITIN_INITIALIZED = "_itin_initialized"
+STAY_INITIALIZED = "_stay_initialized"
 
-ITIN_KEY = "itinerary"
-PROF_KEY = "user_profile"
+STAY_KEY = "stay_record"       # StayRecord JSON in session state
+PROF_KEY = "user_profile"      # guest profile dict in session state
 
-ITIN_START_DATE = "itinerary_start_date"
-ITIN_END_DATE = "itinerary_end_date"
-ITIN_DATETIME = "itinerary_datetime"
-
-START_DATE = "start_date"
-END_DATE = "end_date"
+STAY_CHECK_IN = "stay_check_in_date"   # YYYY-MM-DD, for prompt template injection
+STAY_CHECK_OUT = "stay_check_out_date"

@@ -15,13 +15,9 @@
 """Per-agent before_model_callbacks that inject agent-specific hotel policies.
 
 Design:
-  - Each function has a single responsibility: inject the policy for its
-    designated agent domain.
-  - Functions are plain async callables matching ADK's BeforeModelCallback
-    protocol — Agent depends on the protocol, not on this module directly.
-  - Sub-agents in the same domain share their parent domain's callback
-    (e.g. place_agent and poi_agent both use inspiration_policy_callback).
-  - All functions return None so they never short-circuit the ADK flow.
+  - Each function injects the policy for its designated agent domain.
+  - Functions match ADK's BeforeModelCallback protocol and return None.
+  - Sub-agents in the same domain share their parent's callback.
 
 Execution order (ADK):
   HotelPolicyPlugin.before_model_callback  (general policy, runs first)
@@ -42,80 +38,75 @@ def _load(filename: str) -> str:
     return (_DIR / filename).read_text(encoding="utf-8")
 
 
-# Load each policy file once at import time.
-_ROOT_POLICY         = _load("root_agent.md")
-_INSPIRATION_POLICY  = _load("inspiration_agent.md")
-_PLANNING_POLICY     = _load("planning_agent.md")
-_BOOKING_POLICY      = _load("booking_agent.md")
-_PRE_TRIP_POLICY     = _load("pre_trip_agent.md")
-_IN_TRIP_POLICY      = _load("in_trip_agent.md")
-_POST_TRIP_POLICY    = _load("post_trip_agent.md")
+_ROOT_POLICY            = _load("root_agent.md")
+_PRE_STAY_POLICY        = _load("pre_stay_agent.md")
+_IN_STAY_POLICY         = _load("in_stay_agent.md")
+_POST_STAY_POLICY       = _load("post_stay_agent.md")
+_DINING_POLICY          = _load("dining_agent.md")
+_HOUSEKEEPING_POLICY    = _load("housekeeping_agent.md")
+_LOCAL_CONCIERGE_POLICY = _load("local_concierge_agent.md")
+_STAY_MONITOR_POLICY    = _load("stay_monitor_agent.md")
 
-
-# ── Callback functions ────────────────────────────────────────────────────────
-# One function per policy domain.  Sub-agents within a domain reuse their
-# parent's callback — wired at the Agent definition, not here.
 
 async def root_agent_policy_callback(
     callback_context: CallbackContext,
     llm_request: LlmRequest,
 ) -> Optional[LlmResponse]:
-    """Inject root_agent hotel policy into the system instruction."""
     llm_request.append_instructions([_ROOT_POLICY])
     return None
 
 
-async def inspiration_policy_callback(
+async def pre_stay_policy_callback(
     callback_context: CallbackContext,
     llm_request: LlmRequest,
 ) -> Optional[LlmResponse]:
-    """Inject inspiration-domain hotel policy (inspiration_agent, place_agent, poi_agent)."""
-    llm_request.append_instructions([_INSPIRATION_POLICY])
+    llm_request.append_instructions([_PRE_STAY_POLICY])
     return None
 
 
-async def planning_policy_callback(
+async def in_stay_policy_callback(
     callback_context: CallbackContext,
     llm_request: LlmRequest,
 ) -> Optional[LlmResponse]:
-    """Inject planning-domain hotel policy (planning_agent, hotel_search_agent,
-    hotel_room_selection_agent, itinerary_agent)."""
-    llm_request.append_instructions([_PLANNING_POLICY])
+    llm_request.append_instructions([_IN_STAY_POLICY])
     return None
 
 
-async def booking_policy_callback(
+async def post_stay_policy_callback(
     callback_context: CallbackContext,
     llm_request: LlmRequest,
 ) -> Optional[LlmResponse]:
-    """Inject booking-domain hotel policy (booking_agent, create_reservation,
-    payment_choice, process_payment)."""
-    llm_request.append_instructions([_BOOKING_POLICY])
+    llm_request.append_instructions([_POST_STAY_POLICY])
     return None
 
 
-async def pre_trip_policy_callback(
+async def dining_policy_callback(
     callback_context: CallbackContext,
     llm_request: LlmRequest,
 ) -> Optional[LlmResponse]:
-    """Inject pre-trip hotel policy (pre_trip_agent, what_to_pack_agent)."""
-    llm_request.append_instructions([_PRE_TRIP_POLICY])
+    llm_request.append_instructions([_DINING_POLICY])
     return None
 
 
-async def in_trip_policy_callback(
+async def housekeeping_policy_callback(
     callback_context: CallbackContext,
     llm_request: LlmRequest,
 ) -> Optional[LlmResponse]:
-    """Inject in-trip hotel policy (in_trip_agent, day_of_agent, trip_monitor_agent)."""
-    llm_request.append_instructions([_IN_TRIP_POLICY])
+    llm_request.append_instructions([_HOUSEKEEPING_POLICY])
     return None
 
 
-async def post_trip_policy_callback(
+async def local_concierge_policy_callback(
     callback_context: CallbackContext,
     llm_request: LlmRequest,
 ) -> Optional[LlmResponse]:
-    """Inject post-trip hotel policy (post_trip_agent)."""
-    llm_request.append_instructions([_POST_TRIP_POLICY])
+    llm_request.append_instructions([_LOCAL_CONCIERGE_POLICY])
+    return None
+
+
+async def stay_monitor_policy_callback(
+    callback_context: CallbackContext,
+    llm_request: LlmRequest,
+) -> Optional[LlmResponse]:
+    llm_request.append_instructions([_STAY_MONITOR_POLICY])
     return None

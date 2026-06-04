@@ -1,4 +1,4 @@
-# Copyright 2025 Google LLC
+# Copyright 2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,184 +12,94 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Common data schema and types for travel-concierge agents."""
+"""Common data schema and types for hotel-concierge agents."""
 
 from google.genai import types
 from pydantic import BaseModel, Field
 
-# Convenient declaration for controlled generation.
 json_response_config = types.GenerateContentConfig(
     response_mime_type="application/json"
 )
 
 
+class StayRecord(BaseModel):
+    """The guest's confirmed hotel stay — central session state object."""
+    hotel_name: str
+    hotel_address: str
+    room_type: str
+    booking_id: str
+    check_in_date: str        # YYYY-MM-DD
+    check_out_date: str       # YYYY-MM-DD
+    check_in_time: str        # HH:MM
+    check_out_time: str       # HH:MM
+    arrival_eta: str | None = None
+    num_nights: int
+
+
+class GuestPreferences(BaseModel):
+    """Structured hotel stay preferences, built up across stays."""
+    pillow_preference: str | None = None
+    room_temperature_c: int | None = None
+    floor_preference: str | None = None
+    bed_type_preference: str | None = None
+    view_preference: str | None = None
+    dietary_restrictions: list[str] = Field(default_factory=list)
+    special_requests: list[str] = Field(default_factory=list)
+
+
+class ServiceCharge(BaseModel):
+    """A charge posted to the guest's room during their stay."""
+    charge_id: str
+    service_type: str   # "dining" | "housekeeping" | "local"
+    description: str
+    amount_usd: float
+    posted_at: str      # ISO datetime
+
+
+class ExtractedPreference(BaseModel):
+    """A single structured preference extracted from free-text feedback."""
+    field: str                  # e.g. "pillow_preference"
+    value: str | list[str]      # list for multi-value fields like dietary_restrictions
+    confidence: str             # "high" | "medium" | "low"
+
+
 class Room(BaseModel):
     """A room for selection."""
-
-    is_available: bool = Field(
-        description="Whether the room type is available for selection."
-    )
-    price_in_usd: int = Field(description="The cost of the room selection.")
-    room_type: str = Field(
-        description="Type of room, e.g. Twin with Balcon, King with Ocean View... etc."
-    )
+    is_available: bool = Field(description="Whether the room type is available.")
+    price_in_usd: int = Field(description="The cost of the room.")
+    room_type: str = Field(description="Type of room, e.g. King with Ocean View.")
 
 
 class RoomsSelection(BaseModel):
-    """A list of rooms for selection."""
-
     rooms: list[Room]
 
 
 class Hotel(BaseModel):
-    """A hotel from the search."""
-
+    """A hotel property."""
     name: str = Field(description="Name of the hotel")
-    address: str = Field(description="Full address of the Hotel")
-    check_in_time: str = Field(description="Time in HH:MM format, e.g. 16:00")
-    check_out_time: str = Field(description="Time in HH:MM format, e.g. 15:30")
+    address: str = Field(description="Full address of the hotel")
+    check_in_time: str = Field(description="Time in HH:MM format")
+    check_out_time: str = Field(description="Time in HH:MM format")
     thumbnail: str = Field(description="Hotel logo location")
     price: int = Field(description="Price of the room per night")
 
 
 class HotelsSelection(BaseModel):
-    """A list of hotels from the search."""
-
     hotels: list[Hotel]
 
 
-class Destination(BaseModel):
-    """A destination recommendation."""
-
-    name: str = Field(description="A Destination's Name")
-    country: str = Field(description="The Destination's Country Name")
-    image: str = Field(
-        description="verified URL to an image of the destination"
-    )
-    highlights: str = Field(
-        description="Short description highlighting key features"
-    )
-    rating: str = Field(description="Numerical rating (e.g., 4.5)")
-
-
-class DestinationIdeas(BaseModel):
-    """Destinations recommendation."""
-
-    places: list[Destination]
-
-
 class POI(BaseModel):
-    """A Point Of Interest suggested by the agent."""
-
+    """A Point Of Interest for local area recommendations."""
     place_name: str = Field(description="Name of the attraction")
-    address: str = Field(
-        description="An address or sufficient information to geocode for a Lat/Lon"
-    )
-    lat: str = Field(
-        description="Numerical representation of Latitude of the location (e.g., 20.6843)"
-    )
-    long: str = Field(
-        description="Numerical representation of Longitude of the location (e.g., -88.5678)"
-    )
-    review_ratings: str = Field(
-        description="Numerical representation of rating (e.g. 4.8 , 3.0 , 1.0 etc)"
-    )
-    highlights: str = Field(
-        description="Short description highlighting key features"
-    )
-    image_url: str = Field(
-        description="verified URL to an image of the destination"
-    )
-    map_url: str | None = Field(description="Verified URL to Google Map")
-    place_id: str | None = Field(description="Google Map place_id")
+    address: str = Field(description="Address or geocodable location")
+    lat: str = Field(description="Latitude, e.g. 47.6062")
+    long: str = Field(description="Longitude, e.g. -122.3321")
+    review_ratings: str = Field(description="Rating, e.g. 4.8")
+    highlights: str = Field(description="Short description")
+    image_url: str = Field(description="URL to an image")
+    map_url: str | None = Field(default=None, description="Google Maps URL")
+    place_id: str | None = Field(default=None, description="Google Maps place_id")
 
 
 class POISuggestions(BaseModel):
-    """Points of interest recommendation."""
-
     places: list[POI]
-
-
-class AttractionEvent(BaseModel):
-    """An Attraction."""
-
-    event_type: str = Field(default="visit")
-    description: str = Field(
-        description="A title or description of the activity or the attraction visit"
-    )
-    address: str = Field(description="Full address of the attraction")
-    start_time: str = Field(description="Time in HH:MM format, e.g. 16:00")
-    end_time: str = Field(description="Time in HH:MM format, e.g. 16:00")
-    booking_required: bool = Field(default=False)
-    price: str | None = Field(description="Some events may cost money")
-
-
-class HotelEvent(BaseModel):
-    """A Hotel Booking in the itinerary."""
-
-    event_type: str = Field(default="hotel")
-    description: str = Field(
-        description="A name, title or a description of the hotel"
-    )
-    address: str = Field(description="Full address of the attraction")
-    check_in_time: str = Field(description="Time in HH:MM format, e.g. 16:00")
-    check_out_time: str = Field(description="Time in HH:MM format, e.g. 15:30")
-    room_selection: str = Field()
-    booking_required: bool = Field(default=True)
-    price: str | None = Field(
-        description="Total hotel price including all nights"
-    )
-    booking_id: str | None = Field(
-        description="Booking Reference ID, e.g ABCD12345678"
-    )
-
-
-class ItineraryDay(BaseModel):
-    """A single day of events in the itinerary."""
-
-    day_number: int = Field(
-        description="Identify which day of the trip this represents, e.g. 1, 2, 3... etc."
-    )
-    date: str = Field(description="The Date this day YYYY-MM-DD format")
-    events: list[HotelEvent | AttractionEvent] = Field(
-        default=[], description="The list of events for the day"
-    )
-
-
-class Itinerary(BaseModel):
-    """A multi-day itinerary."""
-
-    trip_name: str = Field(
-        description="Simple one liner to describe the trip. e.g. 'San Diego to Seattle Getaway'"
-    )
-    start_date: str = Field(description="Trip Start Date in YYYY-MM-DD format")
-    end_date: str = Field(description="Trip End Date in YYYY-MM-DD format")
-    origin: str = Field(description="Trip Origin, e.g. San Diego")
-    destination: str = Field(description="Trip Destination, e.g. Seattle")
-    days: list[ItineraryDay] = Field(
-        default_factory=list, description="The multi-days itinerary"
-    )
-
-
-class UserProfile(BaseModel):
-    """An example user profile."""
-
-    allergies: list[str] = Field(
-        default=[], description="A list of food allergies to avoid"
-    )
-    diet_preference: list[str] = Field(
-        default=[], description="Vegetarian, Vegan... etc."
-    )
-    passport_nationality: str = Field(
-        description="Nationality of traveler, e.g. US Citizen"
-    )
-    home_address: str = Field(description="Home address of traveler")
-    home_transit_preference: str = Field(
-        description="Preferred mode of transport around home, e.g. drive"
-    )
-
-
-class PackingList(BaseModel):
-    """A list of things to pack for the trip."""
-
-    items: list[str]
