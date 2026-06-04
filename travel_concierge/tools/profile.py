@@ -1,12 +1,13 @@
 """Tools for loading a guest's profile and booking history into session state."""
 
 import logging
+from datetime import datetime, timezone
 
 from google.adk.tools import ToolContext
 from sqlalchemy import select
 
 from travel_concierge.database.db import get_session
-from travel_concierge.database.models import Booking, Guest
+from travel_concierge.database.models import Booking, BookingStatus, Guest
 from travel_concierge.shared_libraries import constants
 
 logger = logging.getLogger(__name__)
@@ -92,8 +93,10 @@ def load_guest_profile(
                 guest.first_name,
                 guest.last_name,
                 guest.email,
+                guest_id=guest.guest_id,
             )
             tool_context.state["guest_bookings"] = bookings
+            _hydrate_stay_record(tool_context, rows)
 
             return {
                 "found": True,
@@ -125,9 +128,61 @@ def _update_profile(
     first_name: str,
     last_name: str,
     email: str,
+    guest_id: str | None = None,
 ) -> None:
-    """Merge name and email into the existing user_profile state dict."""
+    """Merge name, email, and (when known) guest_id into user_profile state."""
     profile = tool_context.state.get(constants.PROF_KEY) or {}
     profile["name"] = f"{first_name} {last_name}"
     profile["email"] = email
+    if guest_id is not None:
+        profile["guest_id"] = guest_id
     tool_context.state[constants.PROF_KEY] = profile
+
+
+def _hydrate_stay_record(tool_context: ToolContext, bookings: list[Booking]) -> None:
+    """Populate stay_record in session state from the guest's active/upcoming CONFIRMED booking.
+
+    Picks the currently active stay (check_in <= now <= check_out) first, then the
+    nearest upcoming CONFIRMED booking. Does nothing if no suitable booking exists.
+    """
+    now_utc = datetime.now(timezone.utc)
+
+    def _to_utc(dt: datetime) -> datetime:
+        return dt.replace(tzinfo=timezone.utc) if dt.tzinfo is None else dt
+
+    best: Booking | None = None
+    for b in bookings:
+        if b.status != BookingStatus.CONFIRMED:
+            continue
+        ci = _to_utc(b.check_in_date)
+        co = _to_utc(b.check_out_date)
+        if ci <= now_utc <= co:
+            best = b
+            break
+        if ci > now_utc:
+            if best is None or _to_utc(best.check_in_date) > ci:
+                best = b
+
+    if best is None:
+        return
+
+    stay_record = {
+        "hotel_name": best.hotel.name,
+        "hotel_address": best.hotel.address,
+        "room_type": best.room.room_type,
+        "booking_id": best.booking_id,
+        "check_in_date": best.check_in_date.strftime("%Y-%m-%d"),
+        "check_out_date": best.check_out_date.strftime("%Y-%m-%d"),
+        "check_in_time": best.hotel.check_in_time,
+        "check_out_time": best.hotel.check_out_time,
+        "arrival_eta": None,
+        "num_nights": best.num_nights,
+    }
+    tool_context.state[constants.STAY_KEY] = stay_record
+    tool_context.state[constants.STAY_CHECK_IN] = stay_record["check_in_date"]
+    tool_context.state[constants.STAY_CHECK_OUT] = stay_record["check_out_date"]
+    logger.info(
+        "Hydrated stay_record from booking %s (check-in %s)",
+        best.booking_id,
+        stay_record["check_in_date"],
+    )

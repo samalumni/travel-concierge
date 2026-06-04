@@ -5,6 +5,7 @@ import uuid
 from datetime import datetime, timezone
 
 from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 
 from travel_concierge.database.db import get_session
 from travel_concierge.database.models import ServiceCharge
@@ -33,17 +34,21 @@ def post_room_charge(
     charge_id = str(uuid.uuid4())
     posted_at = datetime.now(timezone.utc)
 
-    with get_session() as session:
-        charge = ServiceCharge(
-            charge_id=charge_id,
-            booking_id=booking_id,
-            service_type=service_type,
-            description=description,
-            amount_usd=amount_usd,
-            posted_at=posted_at,
-        )
-        session.add(charge)
-        session.commit()
+    try:
+        with get_session() as session:
+            charge = ServiceCharge(
+                charge_id=charge_id,
+                booking_id=booking_id,
+                service_type=service_type,
+                description=description,
+                amount_usd=amount_usd,
+                posted_at=posted_at,
+            )
+            session.add(charge)
+            session.commit()
+    except SQLAlchemyError as exc:
+        logger.warning("post_room_charge failed for booking %s: %s", booking_id, exc)
+        return {"error": f"Could not post charge: {exc}"}
 
     logger.info("Posted %s charge %.2f for booking %s", service_type, amount_usd, booking_id)
     return {

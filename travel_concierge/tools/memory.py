@@ -80,7 +80,7 @@ def forget(key: str, value: str, tool_context: ToolContext):
     Returns:
         A status message.
     """
-    if tool_context.state[key] is None:
+    if tool_context.state.get(key) is None:
         tool_context.state[key] = []
     if value in tool_context.state[key]:
         tool_context.state[key].remove(value)
